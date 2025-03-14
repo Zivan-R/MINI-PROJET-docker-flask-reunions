@@ -1,0 +1,42 @@
+---
+version: '3.9'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    volumes:
+      - ./:/app
+    environment:
+      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://oyokai:123456@db/reunions
+    command: >
+      sh -c "python wait_db.py && python create_db.py && flask run --host=0.0.0.0"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: reunions
+      MYSQL_USER: oyokai
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+volumes:
+  db_data: {}
